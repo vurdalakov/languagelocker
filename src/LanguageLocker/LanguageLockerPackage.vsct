@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+
+  <Commands package="guidLanguageLockerPackage">
+
+    <Groups>
+      <Group guid="guidLanguageLockerPackageCmdSet" id="LanguageLockerMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidLanguageLockerPackageCmdSet" id="LanguageLockerCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidLanguageLockerPackageCmdSet" id="LanguageLockerMenuGroup" />
+        <CommandFlag>TextChanges</CommandFlag>
+        <Strings>
+          <ButtonText>Invoke LockLanguageMenuCommand</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+
+  </Commands>
+
+  <Symbols>
+    
+    <GuidSymbol name="guidLanguageLockerPackage" value="{6b3f1e16-48d2-4bcb-bd1e-952d76e7aae1}" />
+
+    <GuidSymbol name="guidLanguageLockerPackageCmdSet" value="{edf0c6b1-3438-43e2-879a-b53094a60063}">
+      <IDSymbol name="LanguageLockerMenuGroup" value="0x1020" />
+      <IDSymbol name="LanguageLockerCommandId" value="0x0100" />
+    </GuidSymbol>
+    
+  </Symbols>
+
+</CommandTable>
