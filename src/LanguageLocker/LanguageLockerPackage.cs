@@ -5,19 +5,22 @@
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.InteropServices;
+    using System.Threading;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
 
-    [PackageRegistration(UseManagedResourcesOnly = true)]
+    using Task = System.Threading.Tasks.Task;
+
+    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration("#1110", "#1112", "1.1", IconResourceID = 1400)] // Info on this package for Help/About
     [Guid(LanguageLockerPackage.PackageGuidString)]
-    [ProvideAutoLoad(UIContextGuids80.SolutionExists)]
-    [ProvideAutoLoad(UIContextGuids80.NoSolution)]
+    [ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
+    [ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    public sealed class LanguageLockerPackage : Package
+    public sealed class LanguageLockerPackage : AsyncPackage
     {
-        public const string PackageGuidString = "6b3f1e16-48d2-4bcb-bd1e-952d76e7aae1";
+        public const String PackageGuidString = "6B3F1E16-48D2-4BCB-BD1E-952D76E7AAE1";
 
         public LanguageLockerPackage()
         {
@@ -29,9 +32,11 @@
 
         private OleMenuCommand _lockLanguageMenuCommand;
 
-        protected override void Initialize()
+        protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            base.Initialize();
+            // switch to the UI thread
+
+            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
             // handle settings
 
@@ -56,7 +61,7 @@
             var commandService = this.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (commandService != null)
             {
-                var commandSet = new Guid("edf0c6b1-3438-43e2-879a-b53094a60063");
+                var commandSet = new Guid("EDF0C6B1-3438-43E2-879A-B53094A60063");
 
                 var commandID = new CommandID(commandSet, 0x0100);
                 this._lockLanguageMenuCommand = new OleMenuCommand(this.OnLockLanguageMenuCommandClicked, commandID);
