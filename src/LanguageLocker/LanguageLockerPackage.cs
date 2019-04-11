@@ -1,4 +1,4 @@
-﻿namespace LanguageLocker
+﻿namespace Vurdalakov
 {
     using System;
     using System.ComponentModel.Design;
@@ -9,7 +9,7 @@
     using Microsoft.VisualStudio.Shell.Interop;
 
     [PackageRegistration(UseManagedResourcesOnly = true)]
-    [InstalledProductRegistration("#1110", "#1112", "1.0", IconResourceID = 1400)] // Info on this package for Help/About
+    [InstalledProductRegistration("#1110", "#1112", "1.1", IconResourceID = 1400)] // Info on this package for Help/About
     [Guid(LanguageLockerPackage.PackageGuidString)]
     [ProvideAutoLoad(UIContextGuids80.SolutionExists)]
     [ProvideAutoLoad(UIContextGuids80.NoSolution)]
@@ -23,11 +23,9 @@
         {
         }
 
-        private Vurdalakov.LanguageProfiles _languageProfiles = new Vurdalakov.LanguageProfiles();
+        private KeyboardLayoutLocker _keyboardLayoutLocker = new KeyboardLayoutLocker();
 
         private Boolean _lockLanguage = true;
-
-        private UInt16 _language = 0;
 
         private OleMenuCommand _lockLanguageMenuCommand;
 
@@ -46,23 +44,12 @@
 
             this._lockLanguage = Properties.Settings.Default.LockLanguage;
 
-            // subscribe for language change events
+            // lock keyboard layout if required
 
-            if (!this._languageProfiles.Subscribe())
+            if (this._lockLanguage)
             {
-                Trace.WriteLine("Cannot subscribe");
-                return;
+                this._keyboardLayoutLocker.Lock();
             }
-
-            this._language = this._languageProfiles.GetCurrentLanguage();
-
-            if (0 == this._language)
-            {
-                Trace.WriteLine("Cannot get current language");
-                return;
-            }
-
-            this._languageProfiles.LanguageChanged += this.OnLanguageProfilesLanguageChanged;
 
             // add menu command
 
@@ -78,22 +65,9 @@
             }
         }
 
-        private void OnLanguageProfilesLanguageChanged(Object sender, EventArgs e)
-        {
-            if (this._lockLanguage)
-            {
-                var newLanguage = this._languageProfiles.GetCurrentLanguage();
-
-                if (newLanguage != this._language)
-                {
-                    System.Threading.Tasks.Task.Factory.StartNew(() => this._languageProfiles.SetCurrentLanguage(this._language));
-                }
-            }
-        }
-
         private void OnLockLanguageMenuCommandBeforeQueryStatus(Object sender, EventArgs e)
         {
-            this._lockLanguageMenuCommand.Text = this._lockLanguage ? "Unlock Keyboard Language" : "Lock Keyboard Language";
+            this._lockLanguageMenuCommand.Text = this._lockLanguage ? "Unlock Keyboard Layout" : "Lock Keyboard Layout";
         }
 
         private void OnLockLanguageMenuCommandClicked(Object sender, EventArgs e)
@@ -103,9 +77,13 @@
             Properties.Settings.Default.LockLanguage = this._lockLanguage;
             Properties.Settings.Default.Save();
 
-            if (this._lockLanguage)
+            if (this._lockLanguage && !this._keyboardLayoutLocker.IsLocked)
             {
-                this._language = this._languageProfiles?.GetCurrentLanguage() ?? 0;
+                this._keyboardLayoutLocker.Lock();
+            }
+            else if (!this._lockLanguage && this._keyboardLayoutLocker.IsLocked)
+            {
+                this._keyboardLayoutLocker.Unlock();
             }
         }
 
@@ -113,9 +91,9 @@
         {
             base.Dispose(disposing);
 
-            // unsubscribe from language change events
+            // dispose locker
 
-            this._languageProfiles.Unubscribe();
+            this._keyboardLayoutLocker.Dispose();
         }
     }
 }
