@@ -120,6 +120,7 @@ namespace Vurdalakov
             }
 
             this.IsLocked = true;
+            Debug.WriteLine("Locked");
 
             return true;
         }
@@ -136,6 +137,7 @@ namespace Vurdalakov
             this._keyboardLayout = 0;
 
             this.IsLocked = false;
+            Debug.WriteLine("Unlocked");
         }
 
         private void OnKeyboardLayoutProfileActivated(Object sender, KeyboardLayoutProfileActivationEventArgs e)

@@ -19,7 +19,7 @@
         <CommandFlag>DontCache</CommandFlag>
         <CommandFlag>TextChanges</CommandFlag>
         <Strings>
-          <ButtonText>Lock Keyboard Layout</ButtonText>
+          <ButtonText>Language Locker is loading...</ButtonText>
         </Strings>
       </Button>
     </Buttons>

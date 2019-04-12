@@ -24,6 +24,7 @@
 
         public LanguageLockerPackage()
         {
+            Debug.WriteLine("LLocker load");
         }
 
         private KeyboardLayoutLocker _keyboardLayoutLocker = new KeyboardLayoutLocker();
@@ -34,6 +35,10 @@
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
+            Debug.WriteLine("LLocker init started");
+
+            await base.InitializeAsync(cancellationToken, progress);
+            
             // switch to the UI thread
 
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
@@ -78,6 +83,8 @@
                 this._lockLanguageMenuCommand.Enabled = this._keyboardLayoutLocker.IsCreated;
                 commandService.AddCommand(this._lockLanguageMenuCommand);
             }
+
+            Debug.WriteLine("LLocker init done");
         }
 
         private void OnLockLanguageMenuCommandBeforeQueryStatus(Object sender, EventArgs e)
