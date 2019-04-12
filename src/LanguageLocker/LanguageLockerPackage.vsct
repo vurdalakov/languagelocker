@@ -15,9 +15,11 @@
     <Buttons>
       <Button guid="guidLanguageLockerPackageCmdSet" id="LanguageLockerCommandId" priority="0x0100" type="Button">
         <Parent guid="guidLanguageLockerPackageCmdSet" id="LanguageLockerMenuGroup" />
+        <CommandFlag>DefaultDisabled</CommandFlag>
+        <CommandFlag>DontCache</CommandFlag>
         <CommandFlag>TextChanges</CommandFlag>
         <Strings>
-          <ButtonText>Invoke LockLanguageMenuCommand</ButtonText>
+          <ButtonText>Lock Keyboard Layout</ButtonText>
         </Strings>
       </Button>
     </Buttons>

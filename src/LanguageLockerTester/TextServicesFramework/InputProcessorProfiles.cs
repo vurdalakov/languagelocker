@@ -1,6 +1,7 @@
 ﻿namespace Vurdalakov.TextServicesFramework
 {
     using System;
+    using System.Runtime.InteropServices;
 
     public class InputProcessorProfiles : BaseInterfaceClass, NativeApi.ITfLanguageProfileNotifySink
     {
@@ -63,6 +64,61 @@
 
             var result = this.InputProcessorProfileMgrInterface.GetActiveProfile(NativeApi.GUID_TFCAT_TIP_KEYBOARD, out keyboardLayout);
             return this.CheckResult(result, "ITfInputProcessorProfileMgr.GetActivateProfile");
+        }
+
+        public Boolean GetKeyboardLayouts(UInt16 langid, out NativeApi.TF_INPUTPROCESSORPROFILE[] keyboardLayouts)
+        {
+            keyboardLayouts = null;
+
+            if (!this.IsCreated())
+            {
+                return false;
+            }
+
+            var result = this.InputProcessorProfileMgrInterface.EnumProfiles(langid, out var enumerator);
+            if (!this.CheckResult(result, "ITfInputProcessorProfileMgr.EnumProfiles"))
+            {
+                return false;
+            }
+
+            result = enumerator.Reset();
+            if (!this.CheckResult(result, "IEnumTfInputProcessorProfiles.Reset"))
+            {
+                return false;
+            }
+
+            var profiles = new NativeApi.TF_INPUTPROCESSORPROFILE[32];
+
+            result = enumerator.Next((UInt32)profiles.Length, profiles, out var profilesRead);
+            if (!this.CheckResult(result, "IEnumTfInputProcessorProfiles.Next"))
+            {
+                return false;
+            }
+
+            var keyboardLayoutsCount = 0;
+
+            for (var i = 0; i < profilesRead; i++)
+            {
+                if (NativeApi.TF_PROFILETYPE_KEYBOARDLAYOUT == (profiles[i].dwProfileType & NativeApi.TF_PROFILETYPE_KEYBOARDLAYOUT))
+                {
+                    keyboardLayoutsCount++;
+                }
+            }
+
+            keyboardLayouts = new NativeApi.TF_INPUTPROCESSORPROFILE[keyboardLayoutsCount];
+
+            var keyboardLayoutsIndex = 0;
+
+            for (var i = 0; i < profilesRead; i++)
+            {
+                if (NativeApi.TF_PROFILETYPE_KEYBOARDLAYOUT == (profiles[i].dwProfileType & NativeApi.TF_PROFILETYPE_KEYBOARDLAYOUT))
+                {
+                    keyboardLayouts[keyboardLayoutsIndex] = profiles[i];
+                    keyboardLayoutsIndex++;
+                }
+            }
+
+            return true;
         }
 
         // ITfLanguageProfileNotifySink

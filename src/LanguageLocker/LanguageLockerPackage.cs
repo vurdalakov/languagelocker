@@ -40,16 +40,25 @@
 
             // handle settings
 
-            if (Properties.Settings.Default.UpgradeUserSettings)
+            try
             {
-                Properties.Settings.Default.Upgrade();
-                Properties.Settings.Default.UpgradeUserSettings = false;
-                Properties.Settings.Default.Save();
+                if (Properties.Settings.Default.UpgradeUserSettings)
+                {
+                    Properties.Settings.Default.Upgrade();
+                    Properties.Settings.Default.UpgradeUserSettings = false;
+                    Properties.Settings.Default.Save();
+                }
+
+                this._lockLanguage = Properties.Settings.Default.LockLanguage;
+            }
+            catch (Exception ex)
+            {
+                this.Trace("Cannot load settings", ex);
             }
 
-            this._lockLanguage = Properties.Settings.Default.LockLanguage;
-
             // lock keyboard layout if required
+
+            this._keyboardLayoutLocker.Create();
 
             if (this._lockLanguage)
             {
@@ -66,29 +75,50 @@
                 var commandID = new CommandID(commandSet, 0x0100);
                 this._lockLanguageMenuCommand = new OleMenuCommand(this.OnLockLanguageMenuCommandClicked, commandID);
                 this._lockLanguageMenuCommand.BeforeQueryStatus += this.OnLockLanguageMenuCommandBeforeQueryStatus;
+                this._lockLanguageMenuCommand.Enabled = this._keyboardLayoutLocker.IsCreated;
                 commandService.AddCommand(this._lockLanguageMenuCommand);
             }
         }
 
         private void OnLockLanguageMenuCommandBeforeQueryStatus(Object sender, EventArgs e)
         {
-            this._lockLanguageMenuCommand.Text = this._lockLanguage ? "Unlock Keyboard Layout" : "Lock Keyboard Layout";
+            try
+            {
+                this._lockLanguageMenuCommand.Text = this._keyboardLayoutLocker.IsLocked ? "Unlock Keyboard Layout" : "Lock Keyboard Layout";
+
+                var keyboardLayout = this._keyboardLayoutLocker.GetCurrentKeyboardLayout();
+                var keyboardLayoutName = this._keyboardLayoutLocker.GetKeyboardLayoutName(keyboardLayout);
+                Debug.WriteLine($"0x{keyboardLayout:X8} '{keyboardLayoutName}'");
+
+                this._lockLanguageMenuCommand.Text += $" ({keyboardLayoutName})";
+            }
+            catch (Exception ex)
+            {
+                this.Trace("Cannot set menu item text", ex);
+            }
         }
 
         private void OnLockLanguageMenuCommandClicked(Object sender, EventArgs e)
         {
-            this._lockLanguage = !this._lockLanguage;
-
-            Properties.Settings.Default.LockLanguage = this._lockLanguage;
-            Properties.Settings.Default.Save();
-
-            if (this._lockLanguage && !this._keyboardLayoutLocker.IsLocked)
+            try
             {
-                this._keyboardLayoutLocker.Lock();
+                this._lockLanguage = !this._lockLanguage;
+
+                Properties.Settings.Default.LockLanguage = this._lockLanguage;
+                Properties.Settings.Default.Save();
+
+                if (this._lockLanguage && !this._keyboardLayoutLocker.IsLocked)
+                {
+                    this._keyboardLayoutLocker.Lock();
+                }
+                else if (!this._lockLanguage && this._keyboardLayoutLocker.IsLocked)
+                {
+                    this._keyboardLayoutLocker.Unlock();
+                }
             }
-            else if (!this._lockLanguage && this._keyboardLayoutLocker.IsLocked)
+            catch (Exception ex)
             {
-                this._keyboardLayoutLocker.Unlock();
+                this.Trace("Cannot handle menu command", ex);
             }
         }
 
@@ -99,6 +129,11 @@
             // dispose locker
 
             this._keyboardLayoutLocker.Dispose();
+        }
+
+        private void Trace(String message, Exception ex)
+        {
+            Debug.WriteLine($"{message}: {ex.GetType().Name} - {ex.Message}");
         }
     }
 }

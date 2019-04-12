@@ -7,6 +7,23 @@
     {
         // -------------------------------------------------------------------------------------------------------------------------------------------
 
+        // IEnumTfInputProcessorProfiles
+
+        // https://docs.microsoft.com/en-us/windows/desktop/api/msctf/nn-msctf-ienumtfinputprocessorprofiles
+
+        public const String IID_IEnumTfInputProcessorProfiles = "71C6E74D-0F28-11D8-A82A-00065B84435C";
+
+        [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid(IID_IEnumTfInputProcessorProfiles)]
+        public interface IEnumTfInputProcessorProfiles
+        {
+            Int32 Clone(out IEnumTfInputProcessorProfiles ppEnum);
+            Int32 Next(UInt32 ulCount, [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)] TF_INPUTPROCESSORPROFILE[] pProfile, out UInt32 pcFetch);
+            Int32 Reset();
+            Int32 Skip(UInt32 ulCount);
+        }
+
+        // -------------------------------------------------------------------------------------------------------------------------------------------
+
         // ITfInputProcessorProfileActivationSink
 
         // https://docs.microsoft.com/en-us/windows/desktop/api/msctf/nn-msctf-itfinputprocessorprofileactivationsink
@@ -59,13 +76,13 @@
         [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid(IID_ITfInputProcessorProfileMgr)]
         public interface ITfInputProcessorProfileMgr
         {
-            Int32 ActivateProfile(UInt32 dwProfileType, ushort langid, ref Guid clsid, ref Guid guidProfile, IntPtr hkl, UInt32 dwFlags);
-            Int32 DeactivateProfile(UInt32 dwProfileType, ushort langid, ref Guid clsid, ref Guid guidProfile, IntPtr hkl, UInt32 dwFlags);
-            Int32 GetProfile(UInt32 dwProfileType, ushort langid, ref Guid clsid, ref Guid guidProfile, IntPtr hkl, out TF_INPUTPROCESSORPROFILE     pProfile);
-            Int32 EnumProfiles(short langid, out IntPtr ppEnum);
+            Int32 ActivateProfile(UInt32 dwProfileType, UInt16 langid, ref Guid clsid, ref Guid guidProfile, IntPtr hkl, UInt32 dwFlags);
+            Int32 DeactivateProfile(UInt32 dwProfileType, UInt16 langid, ref Guid clsid, ref Guid guidProfile, IntPtr hkl, UInt32 dwFlags);
+            Int32 GetProfile(UInt32 dwProfileType, UInt16 langid, ref Guid clsid, ref Guid guidProfile, IntPtr hkl, out TF_INPUTPROCESSORPROFILE pProfile);
+            Int32 EnumProfiles(UInt16 langid, out IEnumTfInputProcessorProfiles ppEnum);
             Int32 ReleaseInputProcessor(ref Guid rclsid, UInt32 dwFlags);
-            Int32 RegisterProfile(ref Guid rclsid, ushort langid, ref Guid guidProfile, String desc, UInt32 cchDesc, String iconFile, UInt32 cchFile, UInt32 uIconIndex, IntPtr hklsubstitute, UInt32 dwPreferredLayout, Boolean bEnabledByDefault, UInt32 dwFlags);
-            Int32 UnregisterProfile(Guid rclsid, ushort langid, Guid guidProfile, UInt32 dwFlags);
+            Int32 RegisterProfile(ref Guid rclsid, UInt16 langid, ref Guid guidProfile, String desc, UInt32 cchDesc, String iconFile, UInt32 cchFile, UInt32 uIconIndex, IntPtr hklsubstitute, UInt32 dwPreferredLayout, Boolean bEnabledByDefault, UInt32 dwFlags);
+            Int32 UnregisterProfile(Guid rclsid, UInt16 langid, Guid guidProfile, UInt32 dwFlags);
             Int32 GetActiveProfile(ref Guid catid, out TF_INPUTPROCESSORPROFILE pProfile);
         }
 

@@ -5,6 +5,9 @@ namespace Vurdalakov
 {
     using System;
     using System.Diagnostics;
+    using System.Globalization;
+    using System.Linq;
+    using System.Threading.Tasks;
     using Vurdalakov.TextServicesFramework;
 
     public class KeyboardLayoutLocker : IDisposable
@@ -15,19 +18,91 @@ namespace Vurdalakov
         private InputProcessorProfiles _inputProcessorProfiles = new InputProcessorProfiles();
         private ThreadMgr _threadMgr = new ThreadMgr();
 
+        public Boolean IsCreated { get; private set; } = false;
         public Boolean IsLocked { get; private set; } = false;
 
-        public Boolean Lock()
+        public Boolean Create()
         {
-            if (this.IsLocked)
+            if (this.IsCreated)
             {
-                Debug.WriteLine("Already locked");
+                Debug.WriteLine("Already created");
                 return true;
             }
+
+            this._threadMgr.KeyboardLayoutProfileActivated += this.OnKeyboardLayoutProfileActivated;
 
             if (!this._inputProcessorProfiles.Create() || !this._threadMgr.Create())
             {
                 return false;
+            }
+
+            this.IsCreated = true;
+
+            return true;
+        }
+
+        public void Destroy()
+        {
+            if (!this.IsCreated)
+            {
+                Debug.WriteLine("Not created");
+                return;
+            }
+
+            this._inputProcessorProfiles.Release();
+
+            this._threadMgr.KeyboardLayoutProfileActivated -= this.OnKeyboardLayoutProfileActivated;
+            this._threadMgr.Release();
+
+            this.IsCreated = false;
+        }
+
+        public UInt32 GetCurrentKeyboardLayout()
+        {
+            return this._inputProcessorProfiles.GetActivateKeyboardLayout(out var keyboardLayout) ? (UInt32)keyboardLayout.hkl: 0;
+        }
+
+        public UInt32[] GetKeyboardLayouts(UInt16 langid)
+        {
+            return this._inputProcessorProfiles.GetKeyboardLayouts(langid, out var keyboardLayouts) ? keyboardLayouts.Select(l => (UInt32)l.hkl).ToArray() : null;
+        }
+
+        public String GetKeyboardLayoutName(UInt32 keyboardLayout)
+        {
+            var language = keyboardLayout & 0xFFFF;
+            var languageCulture = new CultureInfo((Int32)language);
+
+            var keyboardLayoutName = languageCulture.ThreeLetterISOLanguageName;
+
+            var keyboardLayouts = this.GetKeyboardLayouts(0);
+
+            var multipleLayoutsPerLanguage = keyboardLayouts.Count(l => language == (l & 0xFFFF)) > 1;
+
+            if (multipleLayoutsPerLanguage)
+            {
+                var layout = keyboardLayout >> 16;
+                var layoutCulture = new CultureInfo((Int32)layout);
+
+                var layoutName = 5 == layoutCulture.Name.Length ? layoutCulture.Name.Substring(3) : layoutCulture.TwoLetterISOLanguageName;
+
+                keyboardLayoutName += $"-{layoutName}";
+            }
+
+            return keyboardLayoutName.ToUpper();
+        }
+
+        public Boolean Lock()
+        {
+            if (!this.IsCreated)
+            {
+                Debug.WriteLine("Not created");
+                return false;
+            }
+
+            if (this.IsLocked)
+            {
+                Debug.WriteLine("Already locked");
+                return true;
             }
 
             if (this._inputProcessorProfiles.GetActivateKeyboardLayout(out var keyboardLayout))
@@ -38,8 +113,11 @@ namespace Vurdalakov
                 this._keyboardLayout = (UInt32)keyboardLayout.hkl;
                 Debug.WriteLine($"Current keyboard layout 0x{this._keyboardLayout:X8}");
             }
-
-            this._threadMgr.KeyboardLayoutProfileActivated += this.OnKeyboardLayoutProfileActivated;
+            else
+            {
+                this._language = 0;
+                this._keyboardLayout = 0;
+            }
 
             this.IsLocked = true;
 
@@ -50,23 +128,21 @@ namespace Vurdalakov
         {
             if (!this.IsLocked)
             {
-                Debug.WriteLine("Already unlocked");
+                Debug.WriteLine("Not locked");
                 return;
             }
 
-            this._inputProcessorProfiles.Release();
-
-            this._threadMgr.KeyboardLayoutProfileActivated -= this.OnKeyboardLayoutProfileActivated;
-            this._threadMgr.Release();
+            this._language = 0;
+            this._keyboardLayout = 0;
 
             this.IsLocked = false;
         }
 
         private void OnKeyboardLayoutProfileActivated(Object sender, KeyboardLayoutProfileActivationEventArgs e)
         {
-            if (this._keyboardLayout != e.KeyboardLayout)
+            if (this.IsLocked && (this._keyboardLayout != 0) && (this._keyboardLayout != e.KeyboardLayout))
             {
-                System.Threading.Tasks.Task.Factory.StartNew(() =>
+                Task.Factory.StartNew(() =>
                 {
                     Debug.WriteLine("Restoring keyboard layout");
                     this._inputProcessorProfiles.SetCurrentLanguage(this._language);
@@ -91,6 +167,7 @@ namespace Vurdalakov
 
                 // free unmanaged objects
                 this.Unlock();
+                this.Destroy();
 
                 this._disposed = true;
             }
