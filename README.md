@@ -18,10 +18,12 @@ Select **Tools** and then **Unlock Keyboard Layout** to allow language switching
 
 Установить расширение можно с помощью диалогового окна **Сервис/Расширения и обновления** (**Tools/Extensions and Updates**) или из [галереи Visual Studio](https://marketplace.visualstudio.com/items?itemName=vurdalak1.languagelocker).
 
----
-
 ![Language Locker](languagelocker1.png)
 
----
+## License
 
-`Language Locker` extension is distributed under the [MIT license](http://opensource.org/licenses/MIT).
+`Language Locker` extension is distributed under the terms of the [MIT license](https://opensource.org/licenses/MIT).
+
+## Acknowledgments
+
+* [Palaso Library](https://github.com/sillsdev/libpalaso)
