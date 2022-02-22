@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Language Locker")]
+[assembly: AssemblyTitle("Language Locker Visual Studio 2017/2019 Extension")]
 [assembly: AssemblyDescription("https://github.com/vurdalakov/languagelocker")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Vurdalakov")]
-[assembly: AssemblyProduct("Language Locker Visual Studio 2017/2019 Extension")]
-[assembly: AssemblyCopyright("Copyright © 2018-2019 Vurdalakov")]
+[assembly: AssemblyProduct("Language Locker Visual Studio Extension")]
+[assembly: AssemblyCopyright("Copyright © 2018-2022 Vurdalakov")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -29,4 +29,4 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.*")]
+[assembly: AssemblyVersion("1.2.*")]

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Language Locker Tester")]
+[assembly: AssemblyTitle("Language Locker Common Code")]
 [assembly: AssemblyDescription("https://github.com/vurdalakov/languagelocker")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Vurdalakov")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("a3f6684b-8445-4110-a849-77e768cf8e64")]
+[assembly: Guid("fcc4fee0-291c-4bb4-8949-c68573996878")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -31,5 +31,4 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.2.*")]
